@@ -32,15 +32,22 @@ controls.minDistance = 22;
 controls.maxDistance = 240;
 controls.target.set(0, 0, 0);
 
-scene.add(new THREE.HemisphereLight(0xfff8ec, 0x6b6250, 0.55));
-const key = new THREE.DirectionalLight(0xfff4e0, 1.6);
-key.position.set(-30, 60, 40);
-scene.add(key);
-const rim = new THREE.DirectionalLight(0xe8eeff, 0.6);
-rim.position.set(40, 20, -50);
-scene.add(rim);
+// Lighting travels with the viewer, like a lamp over the bench that follows the eyeglass:
+// a soft even ambient, a headlight from just above the line of sight and a weak fill from below,
+// so whichever way the movement is turned or orbited, the faces toward the viewer stay lit.
+scene.add(new THREE.AmbientLight(0xfffaf0, 1.15));
+scene.add(camera);
+function cameraLight(intensity, x, y) {
+  const l = new THREE.DirectionalLight(0xfff8ee, intensity);
+  l.position.set(x, y, 0);
+  l.target.position.set(0, 0, -100);   // shine along the view direction
+  camera.add(l, l.target);
+}
+cameraLight(1.25, -25, 35);  // key: a little above and to the left of the eye
+cameraLight(0.35, 30, -25);  // fill: below and to the right, lifting the undersides
 
-// Soft contact shadow, like a photograph on a lightbox
+// Soft contact shadow, like a photograph on a lightbox (hidden when the eye goes below it)
+let contactShadow;
 {
   const c = document.createElement('canvas'); c.width = c.height = 256;
   const g = c.getContext('2d');
@@ -51,6 +58,7 @@ scene.add(rim);
     new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
   shadow.rotation.x = -Math.PI / 2; shadow.position.y = -9;
   scene.add(shadow);
+  contactShadow = shadow;
 }
 
 // flip: turns the movement over about the 12–6 axis. root: model space (+z = bridge side → world up).
@@ -947,6 +955,7 @@ function loop() {
   ghostT += dt;
   MAT.ghost.opacity = 0.12 + 0.1 * (0.5 + 0.5 * Math.sin(ghostT * 4)) + (nearTarget ? 0.15 : 0);
   controls.update();
+  contactShadow.visible = camera.position.y > contactShadow.position.y + 1;
   updateHover();
   renderer.render(scene, camera);
   drawCallouts();
