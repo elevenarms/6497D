@@ -4,6 +4,8 @@ An interactive WebGL assembly of the ETA 6497 hand-wound movement, styled as a t
 
 **Live:** https://elevenarms.github.io/eta-6497-assembly/
 
+![The completed movement running in exploded view, with the rate card and the list of components](docs/screenshot.jpeg)
+
 ## Run locally
 
 ```sh
@@ -38,3 +40,7 @@ It must be served over HTTP, because the model is fetched. Three.js 0.170 loads 
 - **Rendering:** [three.js](https://threejs.org/). STEP tessellation uses [occt-import-js](https://github.com/kovacsv/occt-import-js) (Open CASCADE).
 
 This project is not affiliated with ETA SA, the Swatch Group or the estate of George Daniels.
+
+## License
+
+The code in this repository is released under the [MIT License](LICENSE). Third-party material keeps its own terms: the movement meshes in `assets/` (derived from the GrabCAD model), the Mozart recording (public domain) and the EB Garamond font (SIL Open Font License, loaded from Google Fonts).
