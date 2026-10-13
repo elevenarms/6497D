@@ -2,7 +2,9 @@
 
 An interactive WebGL assembly of the ETA 6497 hand-wound movement, styled as a two-page spread from a classic watchmaking treatise.
 
-## Run
+**Live:** https://elevenarms.github.io/eta-6497-assembly/
+
+## Run locally
 
 ```sh
 cd watch-game
