@@ -23,7 +23,8 @@ It must be served over HTTP, because the model is fetched. Three.js 0.170 loads 
 - **Automatic Assembly** builds the movement in the maker's order, and you can pause it to carry on by hand.
 - **Assemble & Run the Watch** assembles whatever is still missing, winds the mainspring and sets the watch going.
 - Once the movement is complete, you can **Wind** it, **Pull Crown** and then **Turn Crown** to set the hands, show or hide the **Hands**, toggle the **Sound** of the beat, and choose a speed of ×1, ×10, ×60 or ×3600.
-- The view tools are **Turn over**, **Exploded**, the plate style (Colour or Engraving) and **Reset view**. **Music** plays a Mozart string quartet movement.
+- The view tools are **Turn over**, **Exploded** and **Reset view**. The movement is drawn as an engraved plate, in ink line over a pale wash of each part's metal: brass plate, rhodium bridges, gilt wheels, steel, blued screws and ruby jewels.
+- **Music** plays a Mozart string quartet movement. It is on by default and starts with your first click.
 
 ## How it is built
 

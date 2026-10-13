@@ -72,9 +72,14 @@ const MAT = {
   ruby: new THREE.MeshPhysicalMaterial({ color: 0x6e0619, metalness: 0.1, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 0.6 }),
   holder: new THREE.MeshStandardMaterial({ color: 0x8d8579, metalness: 0.6, roughness: 0.55 }),
   ghost: new THREE.MeshBasicMaterial({ color: 0x1d1a15, transparent: true, opacity: 0.16, depthWrite: false }),
-  line: new THREE.MeshLambertMaterial({ color: 0xfbf8f0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
-  linePlate: new THREE.MeshLambertMaterial({ color: 0xdcc9a0, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }),
   edge: new THREE.LineBasicMaterial({ color: 0x1d1a15 }),
+};
+// Engraving fills: a pale wash of each metal, as if hand-tinted over the line work
+const washOf = (hex) => new THREE.MeshLambertMaterial({ color: hex, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
+const WASH = {
+  plate: washOf(0xe2cc9c), rhodium: washOf(0xe9e8e3), gilt: washOf(0xf1db9f), brass: washOf(0xe6cf98),
+  steel: washOf(0xdfe4e8), darksteel: washOf(0xbfc5cb), blued: washOf(0x9aa7c9), ruby: washOf(0xcf8c97),
+  holder: washOf(0xd6cfc2),
 };
 const PART_MAT = {
   mainplate: 'plate', trainbridge: 'rhodium', barrelbridge: 'rhodium', palletbridge: 'rhodium', balancebridge: 'rhodium',
@@ -140,6 +145,24 @@ function buildGeometry(meta, buf, m) {
   return g;
 }
 
+// Layers of the build, counted outward from the plate on each side
+const EXPLODE_STEP = 5.5;
+const EXPLODE_LAYER = {
+  mainplate: 0,
+  // dial side: keyless work on the plate, then wheels, jumper, screw, motion work
+  settinglever: 1, windingpinion: 1, slidingpinion: 1, stem: 1.2, screwsettinglever: 1,
+  yoke: 2, yokespring: 2.6, settingwheel: 2, intsettingwheel: 2, minutewheel: 2,
+  jumper: 3.2, screwjumper: 4.2, cannonpinion: 2.4, hourwheel: 3.4,
+  // bridge side: wheels on the plate, bridges over the wheels, screws and winding wheels over the bridges
+  escapewheel: 1, thirdwheel: 1, secondwheel: 1, centrewheel: 1, barrel: 1, palletfork: 1, balance: 1,
+  trainbridge: 2, barrelbridge: 2, palletbridge: 2, balancebridge: 2,
+  screwtrain1: 3, screwtrain2: 3, screwbarrel1: 3, screwbarrel2: 3, screwbarrel3: 3,
+  screwpallet1: 3, screwpallet2: 3, screwbalance: 3,
+  crownring: 2.7, crownwheel: 3.2, click: 3.2, ratchet: 3.2,
+  screwcrown: 4.2, screwclick: 4.2, screwratchet: 4.2,
+};
+const HANDS_LAYER = 4.4;
+
 const allMeshes = [holderRing]; // every visible movement mesh, for raycasting and style changes
 const ghostMeshes = [];
 
@@ -155,10 +178,8 @@ function makePart(part, meta, buf) {
   part.approachV = new THREE.Vector3(...part.approach);
   part.lift = part.kind === 'stem' ? 11 : part.kind === 'plate' ? 9 : 5;
   part.offset = new THREE.Vector3();
-  // exploded-view distance along the approach direction
-  const zc = (part.bmin.z + part.bmax.z) / 2;
-  part.explode = part.kind === 'plate' ? 0 : part.kind === 'stem' ? 7
-    : 3 + Math.max(0, part.approachV.z * zc) * 3 + (part.kind === 'screw' ? 7 : part.kind === 'bridge' ? 4 : 0);
+  // exploded view: each part rises by its layer in the build, so it stays above what it is mounted on
+  part.explode = (EXPLODE_LAYER[part.id] ?? 1) * EXPLODE_STEP;
 
   part.holder = new THREE.Group(); part.holder.visible = false; root.add(part.holder);
   part.spin = new THREE.Group(); part.spin.position.copy(part.pivotV); part.holder.add(part.spin);
@@ -213,7 +234,7 @@ PARTS.forEach((p, i) => { p.index = i; });
 const state = {
   next: 0, fitted: new Set(), held: null, busy: false, auto: false,
   faults: 0, startedAt: null, finishedAt: null, assisted: false,
-  side: SIDE.DIAL, explodeE: 0, style: 'colour', showHands: true, sound: true,
+  side: SIDE.DIAL, explodeE: 0, showHands: true, sound: true,
 };
 const complete = () => state.next >= PARTS.length;
 const nextPart = () => PARTS[state.next];
@@ -731,25 +752,14 @@ function renderRate() {
   rot('md-h', (c % 43200) / 43200 * 360); rot('md-m', (c % 3600) / 3600 * 360); rot('md-s', (c % 60) / 60 * 360, 16);
 }
 
-// ───────────────────────── Styles of plate ─────────────────────────
-const STYLES = ['colour', 'line'];
-const STYLE_NAMES = { colour: 'Colour', line: 'Engraving' };
-let edgesBuilt = false;
-function applyStyle() {
-  const s = state.style;
-  if (s === 'line' && !edgesBuilt) {
-    for (const m of allMeshes) {
-      const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 32), MAT.edge);
-      e.visible = false; e.userData.isEdge = true; m.add(e); m.userData.edge = e;
-    }
-    edgesBuilt = true;
-  }
+// ───────────────────────── The engraved plate ─────────────────────────
+// Every part is drawn in ink line over a pale wash of its metal.
+function engrave() {
   for (const m of allMeshes) {
-    m.material = s === 'line' ? (m.userData.matKey === 'plate' ? MAT.linePlate : MAT.line) : MAT[m.userData.matKey];
-    if (m.userData.edge) m.userData.edge.visible = s === 'line';
+    m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 32), MAT.edge));
+    m.material = WASH[m.userData.matKey] || WASH.steel;
   }
-  scene.environment = s === 'line' ? null : envMap;
-  $('btn-style').textContent = STYLE_NAMES[s];
+  scene.environment = null;
 }
 
 // ───────────────────────── Completion ─────────────────────────
@@ -841,23 +851,31 @@ $('btn-reset').addEventListener('click', takeDown);
 // Music: Mozart, String Quartet No. 19 in C, K. 465, II. Andante cantabile (Musopen, public domain)
 const music = $('music');
 music.volume = 0.35;
+// On by default. Browsers refuse sound before the first gesture, so if the first attempt is
+// refused the music waits for the visitor's first click or key press.
+let musicWanted = true;
 function setMusic(on) {
+  musicWanted = on;
   $('btn-music').setAttribute('aria-pressed', on);
-  if (on) music.play().catch(() => $('btn-music').setAttribute('aria-pressed', false));
+  if (on) music.play().catch(() => {});
   else music.pause();
 }
-$('btn-music').addEventListener('click', () => setMusic(music.paused));
+function musicOnFirstGesture(e) {
+  if (e.target.closest && e.target.closest('#btn-music')) return; // the toggle decides for itself
+  window.removeEventListener('pointerdown', musicOnFirstGesture, true);
+  window.removeEventListener('keydown', musicOnFirstGesture, true);
+  if (musicWanted && music.paused) music.play().catch(() => {});
+}
+window.addEventListener('pointerdown', musicOnFirstGesture, true);
+window.addEventListener('keydown', musicOnFirstGesture, true);
+$('btn-music').addEventListener('click', (e) => { e.stopPropagation(); setMusic(!musicWanted); });
+setMusic(true);
 $('btn-turn').addEventListener('click', () => { if (!state.busy) turnTo(state.side === SIDE.DIAL ? SIDE.BRIDGE : SIDE.DIAL); });
 $('btn-explode').addEventListener('click', () => {
   const on = $('btn-explode').getAttribute('aria-pressed') !== 'true';
   $('btn-explode').setAttribute('aria-pressed', on);
   const from = state.explodeE;
   tween(0.8, (k) => { state.explodeE = from + ((on ? 1 : 0) - from) * k; });
-});
-$('btn-style').addEventListener('click', () => {
-  state.style = STYLES[(STYLES.indexOf(state.style) + 1) % STYLES.length];
-  if (state.style === 'line' && !edgesBuilt) { $('btn-style').textContent = 'Engraving…'; setTimeout(applyStyle, 30); }
-  else applyStyle();
 });
 $('btn-view').addEventListener('click', () => {
   const from = camera.position.clone(), t0 = controls.target.clone();
@@ -921,6 +939,7 @@ function loop() {
     if (!p.holder) continue;
     p.holder.position.copy(p.offset).addScaledVector(p.approachV, p.explode * state.explodeE);
   }
+  hands.position.z = -HANDS_LAYER * EXPLODE_STEP * state.explodeE;
   applyKinematics();
   ghostT += dt;
   MAT.ghost.opacity = 0.12 + 0.1 * (0.5 + 0.5 * Math.sin(ghostT * 4)) + (nearTarget ? 0.15 : 0);
@@ -941,6 +960,7 @@ async function init() {
       fetchWithProgress('assets/movement.bin', (f) => { $('loading-bar').style.width = `${Math.min(100, f * 100)}%`; }),
     ]);
     for (const p of PARTS) makePart(p, meta, buf);
+    engrave();
   } catch (err) {
     $('loading').querySelector('em').textContent = 'The plate could not be prepared. Serve this folder over HTTP, for example with “npx serve”.';
     console.error(err);
