@@ -6,6 +6,10 @@ An interactive WebGL assembly of the ETA 6497 hand-wound movement, styled as a t
 
 ![The running movement in exploded side view: screws above the bridges, the train under them, the brass plate, and the motion work and hands below](docs/screenshot.jpeg)
 
+## Deployment
+
+GitHub Pages deploys the site with `.github/workflows/pages.yml` on every push to `main`. If the repository secret `GA_MEASUREMENT_ID` is set, the workflow adds the Google Analytics tag to the deployed copy only, so the tag is never committed.
+
 ## Run locally
 
 ```sh
