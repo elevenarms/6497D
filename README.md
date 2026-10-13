@@ -2,9 +2,9 @@
 
 An interactive WebGL assembly of the ETA 6497 hand-wound movement, styled as a two-page spread from a classic watchmaking treatise.
 
-**Live:** https://elevenarms.github.io/eta-6497-assembly/
+**Live:** https://elevenarms.github.io/6497D/
 
-![The running movement in exploded side view: screws above the bridges, the train under them, the brass plate, and the motion work and hands below(docs/screenshot.jpeg)
+![The running movement in exploded side view: screws above the bridges, the train under them, the brass plate, and the motion work and hands below](docs/screenshot.jpeg)
 
 ## Run locally
 
