@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assembling the 6497</title>
+<meta name="description" content="An interactive assembly of the ETA 6497 hand-wound movement, set after the manner of a classic watchmaking treatise.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2714%27 fill=%27%23f3eee1%27 stroke=%27%231d1a15%27 stroke-width=%272%27/%3E%3Cpath d=%27M16 16V6M16 16l6 4%27 stroke=%27%231d1a15%27 stroke-width=%272%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<main class="spread">
+  <!-- ═══════════ Left page: text ═══════════ -->
+  <section class="page page-left" aria-label="Text">
+    <header class="running-head"><span>Watchmaking</span><span class="rh-right">The Hand-Wound Movement</span></header>
+
+    <div class="chapter">
+      <div class="chapter-no">Chapter Nine</div>
+      <h1>Assembling the Movement</h1>
+      <p class="chapter-sub">The ETA 6497, 16½‴ Lépine calibre, 17 jewels, 21,600 vibrations an hour</p>
+    </div>
+
+    <article id="lesson" class="lesson" aria-live="polite">
+      <h2 class="stage-head"><span id="stage-numeral">I</span>. <span id="stage-title">The Keyless Work</span></h2>
+      <p class="stage-sub" id="stage-sub"></p>
+      <p class="prose dropcap" id="stage-intro"></p>
+
+      <div class="step">
+        <div class="step-label">The present operation</div>
+        <p class="step-name"><span class="pos" id="step-pos">1</span> <span id="step-name">Main plate</span></p>
+        <p class="prose" id="step-text"></p>
+        <dl class="specs" id="step-specs"></dl>
+      </div>
+      <p class="notice" id="notice" role="status"></p>
+    </article>
+
+    <div class="parts-head">
+      <span>List of Components</span>
+      <span class="tally" id="tally">0 of 0</span>
+    </div>
+    <ol class="parts" id="parts" aria-label="Components in order of assembly"></ol>
+
+    <footer class="folio"><span id="folio-score">Faults 0</span><span class="folio-no">— 214 —</span><span id="folio-time">0′ 00″</span></footer>
+  </section>
+
+  <!-- ═══════════ Right page: the plate ═══════════ -->
+  <section class="page page-right" aria-label="Figure">
+    <header class="running-head"><span>Assembling the Movement</span><span class="rh-right">Plate <span id="plate-no">XIV</span></span></header>
+
+    <div class="figure" id="figure">
+      <canvas id="gl" aria-label="Three-dimensional view of the movement. Drag to turn, scroll to zoom."></canvas>
+      <svg id="callouts" class="callouts" aria-hidden="true"></svg>
+      <div class="hover-label" id="hover-label" aria-hidden="true"></div>
+      <div class="loading" id="loading"><div class="loading-inner"><em>Preparing the plate…</em><div class="loading-bar"><span id="loading-bar"></span></div></div></div>
+
+      <div class="view-tools" role="toolbar" aria-label="View">
+        <button id="btn-turn" title="Turn the movement over">Turn over</button>
+        <button id="btn-explode" title="Exploded view" aria-pressed="false">Exploded</button>
+        <button id="btn-style" title="Change the plate style">Colour</button>
+        <button id="btn-view" title="Reset the view">Reset view</button>
+      </div>
+
+      <aside class="rate-card" id="rate-card" hidden>
+        <svg class="mini-dial" id="mini-dial" viewBox="-50 -50 100 100" aria-label="Time shown by the movement"></svg>
+        <table class="rate">
+          <tr><th>Time</th><td id="r-time">—</td></tr>
+          <tr><th>Reserve</th><td><span class="reserve"><span id="r-reserve-bar"></span></span> <span id="r-reserve">0 h</span></td></tr>
+          <tr><th>Amplitude</th><td id="r-amp">—</td></tr>
+          <tr><th>Beat</th><td>21,600 A/h</td></tr>
+        </table>
+        <div class="speeds" role="radiogroup" aria-label="Speed">
+          <button data-speed="1" aria-checked="true" role="radio">×1</button>
+          <button data-speed="10" role="radio">×10</button>
+          <button data-speed="60" role="radio">×60</button>
+          <button data-speed="3600" role="radio">×3600</button>
+        </div>
+      </aside>
+    </div>
+
+    <p class="caption" id="caption"><span class="fig-no">Fig. 1.</span> <span id="caption-text"></span></p>
+
+    <nav class="controls" aria-label="Controls">
+      <button id="btn-auto" class="primary">Automatic Assembly</button>
+      <button id="btn-run" class="primary">Wind &amp; Run the Watch</button>
+      <button id="btn-wind">Wind</button>
+      <button id="btn-stem" title="Pull the crown out to set the hands">Pull Crown</button>
+      <button id="btn-hands" aria-pressed="true">Hands</button>
+      <button id="btn-sound" aria-pressed="true" title="The beat of the escapement">Sound</button>
+      <button id="btn-music" aria-pressed="false" title="Mozart, String Quartet K. 465, Andante cantabile">Music</button>
+      <button id="btn-reset">Take Down</button>
+    </nav>
+    <footer class="folio"><span></span><span class="folio-no">— 215 —</span><a class="folio-link" href="https://github.com/elevenarms/eta-6497-assembly#credits" target="_blank" rel="noopener">Source &amp; credits</a></footer>
+  </section>
+</main>
+
+<div class="colophon" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div class="colophon-inner intro-inner">
+    <div class="chapter-no">An Exercise in Assembly</div>
+    <h3 id="intro-title">Assembling the 6497</h3>
+    <p class="intro-body">On the bench before you lie the parts of an ETA 6497, a hand-wound Lépine calibre of seventeen jewels. Your task is to put the movement together in the order the maker lays down, from the bare main plate to the hour wheel, and then to wind it and set it going.</p>
+    <ul class="intro-list">
+      <li>Take up the next part from the <b>List of Components</b>. Choosing a part out of order counts as a fault.</li>
+      <li>Move it over its place, which is shown in shadow on the figure, and click to set it down. <b>Enter</b> sets it for you, and <b>Esc</b> puts it back.</li>
+      <li>Drag the figure to turn it and scroll to zoom. The movement turns over by itself when the work changes sides.</li>
+      <li>When it is complete, <b>Wind</b> the watch, <b>Pull Crown</b> to set the hands, and run it at up to ×3600.</li>
+      <li>To watch the work done for you, use <b>Automatic Assembly</b> or <b>Assemble &amp; Run the Watch</b>.</li>
+    </ul>
+    <button id="btn-intro">Begin the Assembly</button>
+    <button id="btn-intro-auto" class="quiet">Watch It Assembled</button>
+    <p class="credits">
+      Movement model: <em>ETA 6497-1 complete watch movement</em>, GrabCAD community.
+      Technical data: ETA SA, <em>Technical Communication</em> CT 6497-2.
+      Music: Mozart, String Quartet No. 19, K. 465, <em>Andante cantabile</em>, Musopen String Quartet (public domain).
+      Set in EB Garamond and drawn with three.js. The typography follows George Daniels’ <em>Watchmaking</em>; this project is not affiliated with ETA SA or the Daniels estate.
+      <a href="https://github.com/elevenarms/eta-6497-assembly" target="_blank" rel="noopener">Source and full credits on GitHub</a>.
+    </p>
+  </div>
+</div>
+
+<div class="colophon" id="colophon" hidden>
+  <div class="colophon-inner">
+    <p class="colophon-orn">❦</p>
+    <h3>The movement is complete</h3>
+    <p id="colophon-text"></p>
+    <button id="btn-colophon">Wind &amp; Run the Watch</button>
+    <button id="btn-colophon-close" class="quiet">Close</button>
+  </div>
+</div>
+
+<audio id="music" src="assets/audio/mozart-k465-andante.m4a" loop preload="none"></audio>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
