@@ -351,9 +351,11 @@ async function seat(p) {
   const start = p.offset.clone();
   const above = p.approachV.clone().multiplyScalar(p.lift * 0.6);
   await tween(0.32 / pace, (k) => p.offset.lerpVectors(start, above, k));
-  // screws are driven home: right-hand threads clockwise from the head, the crown wheel screw left-handed
+  // screws are driven home: right-hand threads clockwise seen from the head, the crown wheel screw left-handed.
+  // The angle about +z unwinds from dir·3 turns to 0, so dir = +1 turns clockwise as seen from +z.
   const turns = p.kind === 'screw' ? 3 : 0;
-  const dir = (p.approachV.z > 0 ? -1 : 1) * (p.id === 'screwcrown' ? -1 : 1);
+  const headUp = p.approachV.z > 0;           // head faces +z (bridge side) or −z (dial side)
+  const dir = (headUp ? 1 : -1) * (p.id === 'screwcrown' ? -1 : 1);
   await tween((p.kind === 'screw' ? 0.75 : 0.45) / pace, (k) => {
     p.offset.copy(above).multiplyScalar(1 - k);
     if (turns) p.spin.rotation.z = dir * (1 - k) * turns * TAU;
@@ -979,7 +981,7 @@ init();
 
 // exposed for testing in the console
 window.__watch = {
-  state, sim, PARTS, autoAssemble, runWatch, turnTo,
+  state, sim, PARTS, autoAssemble, runWatch, turnTo, camera,
   // screen position (canvas px) of where a part is to go, at the height it is carried
   screenOf(id) {
     const p = byId[id]; root.updateWorldMatrix(true, false);
