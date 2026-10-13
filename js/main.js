@@ -559,11 +559,12 @@ function ensureAudio() {
     for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (audio.sampleRate * 0.0025));
   } catch { audio = null; }
 }
+const CLICK_LEVEL = 0.4; // ticks and ratchet clicks sit 60% below their original level, under the music
 function blip(freq, gain, q = 6) {
   if (!audio || !state.sound) return;
   const src = audio.createBufferSource(); src.buffer = noiseBuf;
   const f = audio.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = q;
-  const g = audio.createGain(); g.gain.value = gain;
+  const g = audio.createGain(); g.gain.value = gain * CLICK_LEVEL;
   src.connect(f).connect(g).connect(audio.destination); src.start();
 }
 const tick = (tock) => blip(tock ? 2900 : 3600, 0.9);
